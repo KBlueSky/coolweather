@@ -47,7 +47,7 @@ public class WeatherActivity extends AppCompatActivity {
     private ImageView bingPicImg;
     public SwipeRefreshLayout swipeRefreshLayout;
     private String mWeatherId;
-
+    private String weatherId;
     public DrawerLayout drawerLayout;
     private Button navButton;
     @Override
@@ -83,19 +83,24 @@ public class WeatherActivity extends AppCompatActivity {
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString =preferences.getString("weather",null);
+
         if(weatherString!=null){
             Weather weather= Utility.handleWeatherResponse(weatherString);
             mWeatherId=weather.basic.weatherId;
+            weatherId=weather.basic.weatherId;
             showWeatherInfo(weather);
         }else{
+            weatherId=getIntent().getStringExtra("weather_id");
             mWeatherId=getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(mWeatherId);
+            requestWeather(weatherId);
         }
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 requestWeather(mWeatherId);
+                requestWeather(weatherId);
             }
         });
         bingPicImg= (ImageView) findViewById(R.id.bing_pic);
@@ -132,6 +137,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     public void requestWeather(String weatherId) {
+        this.weatherId=weatherId;
         String weatherUrl="http://guolin.tech/api/weather?cityid="+weatherId+"&key=2a46a89f2fdf44d9bdfa6c7da42aa26d";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
